@@ -1,274 +1,313 @@
 // DOM Elements
-const loginForm = document.getElementById("login-form")
-const signupForm = document.getElementById("signup-form")
-const forgotPasswordForm = document.getElementById("forgot-password-form")
-const resetPasswordForm = document.getElementById("reset-password-form")
-const dashboard = document.getElementById("dashboard")
+const loginForm = document.getElementById('login-form');
+const signupForm = document.getElementById('signup-form');
+const forgotPasswordForm = document.getElementById('forgot-password-form');
+const dashboard = document.getElementById('dashboard');
+const alertExamples = document.getElementById('alert-examples');
 
-// Navigation links
-document.getElementById("showSignup").addEventListener("click", () => {
-  hideAllForms()
-  signupForm.classList.remove("hidden")
-})
+// Form Elements
+const loginFormElement = document.getElementById('login-form-element');
+const signupFormElement = document.getElementById('signup-form-element');
+const forgotPasswordEmailForm = document.getElementById('forgot-password-email-form');
+const securityQuestionForm = document.getElementById('security-question-form');
+const resetPasswordForm = document.getElementById('reset-password-form');
 
-document.getElementById("showLogin").addEventListener("click", () => {
-  hideAllForms()
-  loginForm.classList.remove("hidden")
-})
+// Navigation Elements
+const signupLink = document.getElementById('signup-link');
+const loginLink = document.getElementById('login-link');
+const forgotPasswordLink = document.getElementById('forgot-password-link');
+const backToLoginBtn = document.getElementById('back-to-login');
+const logoutBtn = document.getElementById('logout-btn');
+const toggleAlertsBtn = document.getElementById('toggle-alerts');
+const backToAuthBtn = document.getElementById('back-to-auth');
 
-document.getElementById("showForgotPassword").addEventListener("click", () => {
-  hideAllForms()
-  forgotPasswordForm.classList.remove("hidden")
-})
+// Error/Success Elements
+const errorMessage = document.getElementById('error-message');
+const signupError = document.getElementById('signup-error');
+const forgotPasswordError = document.getElementById('forgot-password-error');
+const forgotPasswordSuccess = document.getElementById('forgot-password-success');
 
-document.getElementById("backToLogin").addEventListener("click", () => {
-  hideAllForms()
-  loginForm.classList.remove("hidden")
-})
+// User data elements
+const welcomeMessage = document.getElementById('welcome-message');
+const userName = document.getElementById('user-name');
+const userEmail = document.getElementById('user-email');
+const forgotPasswordSubtitle = document.getElementById('forgot-password-subtitle');
 
-document.getElementById("logoutBtn").addEventListener("click", () => {
-  logout()
-})
-
-// Form submissions
-document.getElementById("loginForm").addEventListener("submit", (e) => {
-  e.preventDefault()
-  login()
-})
-
-document.getElementById("signupForm").addEventListener("submit", (e) => {
-  e.preventDefault()
-  signup()
-})
-
-document.getElementById("forgotPasswordForm").addEventListener("submit", (e) => {
-  e.preventDefault()
-  forgotPassword()
-})
-
-document.getElementById("resetPasswordForm").addEventListener("submit", (e) => {
-  e.preventDefault()
-  resetPassword()
-})
-
-// Helper functions
-function hideAllForms() {
-  loginForm.classList.add("hidden")
-  signupForm.classList.add("hidden")
-  forgotPasswordForm.classList.add("hidden")
-  resetPasswordForm.classList.add("hidden")
-  dashboard.classList.add("hidden")
+// Initialize localStorage if empty
+if (!localStorage.getItem('users')) {
+    localStorage.setItem('users', JSON.stringify([]));
 }
 
-function showError(formId, message) {
-  const errorElement = document.getElementById(formId)
-  errorElement.textContent = message
-  setTimeout(() => {
-    errorElement.textContent = ""
-  }, 3000)
+// Navigation Functions
+function showLogin() {
+    loginForm.classList.remove('hidden');
+    signupForm.classList.add('hidden');
+    forgotPasswordForm.classList.add('hidden');
+    dashboard.classList.add('hidden');
+    alertExamples.classList.add('hidden');
+    errorMessage.classList.add('hidden');
 }
 
-function validateEmail(email) {
-  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return re.test(email)
+function showSignup() {
+    loginForm.classList.add('hidden');
+    signupForm.classList.remove('hidden');
+    forgotPasswordForm.classList.add('hidden');
+    dashboard.classList.add('hidden');
+    alertExamples.classList.add('hidden');
+    signupError.classList.add('hidden');
 }
 
-function validatePassword(password) {
-  return password.length >= 8
+function showForgotPassword() {
+    loginForm.classList.add('hidden');
+    signupForm.classList.add('hidden');
+    forgotPasswordForm.classList.remove('hidden');
+    dashboard.classList.add('hidden');
+    alertExamples.classList.add('hidden');
+    forgotPasswordError.classList.add('hidden');
+    forgotPasswordSuccess.classList.add('hidden');
+    
+    // Reset to first step
+    forgotPasswordEmailForm.classList.remove('hidden');
+    securityQuestionForm.classList.add('hidden');
+    resetPasswordForm.classList.add('hidden');
+    forgotPasswordSubtitle.textContent = 'Enter your email to reset your password';
 }
 
-// User management functions
-function getUsers() {
-  const users = localStorage.getItem("users")
-  return users ? JSON.parse(users) : []
+function showDashboard(user) {
+    loginForm.classList.add('hidden');
+    signupForm.classList.add('hidden');
+    forgotPasswordForm.classList.add('hidden');
+    dashboard.classList.remove('hidden');
+    alertExamples.classList.add('hidden');
+    
+    // Update user info
+    welcomeMessage.textContent = `Welcome, ${user.name}`;
+    userName.textContent = user.name;
+    userEmail.textContent = user.email;
 }
 
-function saveUsers(users) {
-  localStorage.setItem("users", JSON.stringify(users))
-}
-
-function findUserByEmail(email) {
-  const users = getUsers()
-  return users.find((user) => user.email.toLowerCase() === email.toLowerCase())
-}
-
-// Authentication functions
-function signup() {
-  const name = document.getElementById("signupName").value.trim()
-  const email = document.getElementById("signupEmail").value.trim()
-  const password = document.getElementById("signupPassword").value
-  const confirmPassword = document.getElementById("signupConfirmPassword").value
-
-  // Validation
-  if (!name || !email || !password || !confirmPassword) {
-    return showError("signupError", "All fields are required")
-  }
-
-  if (!validateEmail(email)) {
-    return showError("signupError", "Please enter a valid email address")
-  }
-
-  if (!validatePassword(password)) {
-    return showError("signupError", "Password must be at least 8 characters long")
-  }
-
-  if (password !== confirmPassword) {
-    return showError("signupError", "Passwords do not match")
-  }
-
-  if (findUserByEmail(email)) {
-    return showError("signupError", "Email already registered")
-  }
-
-  // Create new user
-  const users = getUsers()
-  const newUser = {
-    id: Date.now().toString(),
-    name,
-    email,
-    password,
-    resetToken: null,
-  }
-
-  users.push(newUser)
-  saveUsers(users)
-
-  // Clear form
-  document.getElementById("signupForm").reset()
-
-  // Show success and redirect to login
-  alert("Account created successfully! Please login.")
-  hideAllForms()
-  loginForm.classList.remove("hidden")
-}
-
-function login() {
-  const email = document.getElementById("loginEmail").value.trim()
-  const password = document.getElementById("loginPassword").value
-
-  if (!email || !password) {
-    return showError("loginError", "Email and password are required")
-  }
-
-  const user = findUserByEmail(email)
-
-  if (!user || user.password !== password) {
-    return showError("loginError", "Invalid email or password")
-  }
-
-  // Set current user in session
-  sessionStorage.setItem(
-    "currentUser",
-    JSON.stringify({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-    }),
-  )
-
-  // Show dashboard
-  document.getElementById("userName").textContent = user.name
-  hideAllForms()
-  dashboard.classList.remove("hidden")
-}
-
-function logout() {
-  sessionStorage.removeItem("currentUser")
-  hideAllForms()
-  loginForm.classList.remove("hidden")
-}
-
-function forgotPassword() {
-  const email = document.getElementById("resetEmail").value.trim()
-
-  if (!email) {
-    return showError("resetError", "Please enter your email address")
-  }
-
-  const user = findUserByEmail(email)
-
-  if (!user) {
-    return showError("resetError", "No account found with this email")
-  }
-
-  // Generate reset token
-  const resetToken = Math.random().toString(36).substring(2, 15)
-
-  // Update user with reset token
-  const users = getUsers()
-  const updatedUsers = users.map((u) => {
-    if (u.email.toLowerCase() === email.toLowerCase()) {
-      return { ...u, resetToken }
+function toggleAlertExamples() {
+    if (alertExamples.classList.contains('hidden')) {
+        loginForm.classList.add('hidden');
+        signupForm.classList.add('hidden');
+        forgotPasswordForm.classList.add('hidden');
+        dashboard.classList.add('hidden');
+        alertExamples.classList.remove('hidden');
+        toggleAlertsBtn.textContent = 'Back to Authentication';
+    } else {
+        alertExamples.classList.add('hidden');
+        toggleAlertsBtn.textContent = 'View Alert Examples';
+        
+        // Check if user is logged in
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (currentUser) {
+            showDashboard(currentUser);
+        } else {
+            showLogin();
+        }
     }
-    return u
-  })
-
-  saveUsers(updatedUsers)
-
-  // Store email for reset process
-  sessionStorage.setItem("resetEmail", email)
-
-  // In a real app, you would send an email with a link
-  // For this demo, we'll just proceed to reset form
-  alert("Reset link sent! (In a real app, this would be emailed)")
-  hideAllForms()
-  resetPasswordForm.classList.remove("hidden")
 }
 
-function resetPassword() {
-  const newPassword = document.getElementById("newPassword").value
-  const confirmNewPassword = document.getElementById("confirmNewPassword").value
-  const resetEmail = sessionStorage.getItem("resetEmail")
+// Event Listeners for Navigation
+signupLink.addEventListener('click', showSignup);
+loginLink.addEventListener('click', showLogin);
+forgotPasswordLink.addEventListener('click', showForgotPassword);
+backToLoginBtn.addEventListener('click', showLogin);
+toggleAlertsBtn.addEventListener('click', toggleAlertExamples);
+backToAuthBtn.addEventListener('click', toggleAlertExamples);
 
-  if (!resetEmail) {
-    return showError("newPasswordError", "Reset session expired. Please try again.")
-  }
-
-  if (!newPassword || !confirmNewPassword) {
-    return showError("newPasswordError", "Please enter your new password")
-  }
-
-  if (!validatePassword(newPassword)) {
-    return showError("newPasswordError", "Password must be at least 8 characters long")
-  }
-
-  if (newPassword !== confirmNewPassword) {
-    return showError("newPasswordError", "Passwords do not match")
-  }
-
-  // Update user password
-  const users = getUsers()
-  const updatedUsers = users.map((user) => {
-    if (user.email.toLowerCase() === resetEmail.toLowerCase()) {
-      return {
-        ...user,
-        password: newPassword,
-        resetToken: null,
-      }
+// Login Form Submission
+loginFormElement.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    
+    // Get users from localStorage
+    const users = JSON.parse(localStorage.getItem('users'));
+    
+    // Find user
+    const user = users.find(user => user.email === email && user.password === password);
+    
+    if (user) {
+        // Store current user (without password)
+        const { password, ...userWithoutPassword } = user;
+        localStorage.setItem('currentUser', JSON.stringify(userWithoutPassword));
+        
+        // Show dashboard
+        showDashboard(userWithoutPassword);
+    } else {
+        // Show error
+        errorMessage.classList.remove('hidden');
     }
-    return user
-  })
+});
 
-  saveUsers(updatedUsers)
-  sessionStorage.removeItem("resetEmail")
+// Signup Form Submission
+signupFormElement.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+    const confirmPassword = document.getElementById('signup-confirm-password').value;
+    
+    // Validate form
+    if (!name || !email || !password || !confirmPassword) {
+        signupError.querySelector('.alert-message').textContent = 'All fields are required';
+        signupError.classList.remove('hidden');
+        return;
+    }
+    
+    if (password !== confirmPassword) {
+        signupError.querySelector('.alert-message').textContent = 'Passwords do not match';
+        signupError.classList.remove('hidden');
+        return;
+    }
+    
+    if (password.length < 6) {
+        signupError.querySelector('.alert-message').textContent = 'Password must be at least 6 characters';
+        signupError.classList.remove('hidden');
+        return;
+    }
+    
+    // Get users from localStorage
+    const users = JSON.parse(localStorage.getItem('users'));
+    
+    // Check if user already exists
+    if (users.some(user => user.email === email)) {
+        signupError.querySelector('.alert-message').textContent = 'User with this email already exists';
+        signupError.classList.remove('hidden');
+        return;
+    }
+    
+    // Add new user
+    const newUser = {
+        id: Date.now().toString(),
+        name,
+        email,
+        password
+    };
+    
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+    
+    // Reset form
+    signupFormElement.reset();
+    
+    // Show login form
+    showLogin();
+});
 
-  alert("Password updated successfully! Please login with your new password.")
-  hideAllForms()
-  loginForm.classList.remove("hidden")
-}
+// Forgot Password - Email Form
+forgotPasswordEmailForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const email = document.getElementById('forgot-email').value;
+    
+    // Get users from localStorage
+    const users = JSON.parse(localStorage.getItem('users'));
+    
+    // Find user
+    const user = users.find(user => user.email === email);
+    
+    if (!user) {
+        forgotPasswordError.querySelector('.alert-message').textContent = 'No account found with this email';
+        forgotPasswordError.classList.remove('hidden');
+        return;
+    }
+    
+    // Store email for later steps
+    localStorage.setItem('resetEmail', email);
+    
+    // Show security question form
+    forgotPasswordEmailForm.classList.add('hidden');
+    securityQuestionForm.classList.remove('hidden');
+    forgotPasswordSubtitle.textContent = 'Answer the security question';
+});
+
+// Forgot Password - Security Question Form
+securityQuestionForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const securityAnswer = document.getElementById('security-answer').value;
+    
+    if (!securityAnswer) {
+        forgotPasswordError.querySelector('.alert-message').textContent = 'Security answer is required';
+        forgotPasswordError.classList.remove('hidden');
+        return;
+    }
+    
+    // In a real app, you would verify the security answer
+    // For this demo, we'll accept any answer
+    
+    // Show reset password form
+    securityQuestionForm.classList.add('hidden');
+    resetPasswordForm.classList.remove('hidden');
+    forgotPasswordSubtitle.textContent = 'Create a new password';
+});
+
+// Forgot Password - Reset Password Form
+resetPasswordForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const newPassword = document.getElementById('new-password').value;
+    const confirmNewPassword = document.getElementById('confirm-new-password').value;
+    
+    if (!newPassword || !confirmNewPassword) {
+        forgotPasswordError.querySelector('.alert-message').textContent = 'All fields are required';
+        forgotPasswordError.classList.remove('hidden');
+        return;
+    }
+    
+    if (newPassword !== confirmNewPassword) {
+        forgotPasswordError.querySelector('.alert-message').textContent = 'Passwords do not match';
+        forgotPasswordError.classList.remove('hidden');
+        return;
+    }
+    
+    if (newPassword.length < 6) {
+        forgotPasswordError.querySelector('.alert-message').textContent = 'Password must be at least 6 characters';
+        forgotPasswordError.classList.remove('hidden');
+        return;
+    }
+    
+    // Get reset email
+    const resetEmail = localStorage.getItem('resetEmail');
+    
+    // Update user's password
+    const users = JSON.parse(localStorage.getItem('users'));
+    const updatedUsers = users.map(user => {
+        if (user.email === resetEmail) {
+            return { ...user, password: newPassword };
+        }
+        return user;
+    });
+    
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    
+    // Show success message
+    resetPasswordForm.classList.add('hidden');
+    forgotPasswordSubtitle.textContent = '';
+    forgotPasswordSuccess.classList.remove('hidden');
+    
+    // Redirect to login after 2 seconds
+    setTimeout(() => {
+        showLogin();
+    }, 2000);
+});
+
+// Logout
+logoutBtn.addEventListener('click', function() {
+    localStorage.removeItem('currentUser');
+    showLogin();
+});
 
 // Check if user is already logged in
-function checkAuthState() {
-  const currentUser = sessionStorage.getItem("currentUser")
-
-  if (currentUser) {
-    const user = JSON.parse(currentUser)
-    document.getElementById("userName").textContent = user.name
-    hideAllForms()
-    dashboard.classList.remove("hidden")
-  }
-}
-
-// Initialize
-checkAuthState()
-
+document.addEventListener('DOMContentLoaded', function() {
+    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+    if (currentUser) {
+        showDashboard(currentUser);
+    } else {
+        showLogin();
+    }
+});
