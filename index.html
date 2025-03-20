@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Authentication System</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container" id="main-container">
+    <div class="form-container" id="login-form">
+      <h1>Login</h1>
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email</label>
+          <input type="email" id="loginEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" required>
+        </div>
+        <div class="error-message" id="loginError"></div>
+        <button type="submit">Login</button>
+      </form>
+      <div class="form-links">
+        <a href="#" id="showSignup">Create an account</a>
+        <a href="#" id="showForgotPassword">Forgot password?</a>
+      </div>
+    </div>
+
+    <div class="form-container hidden" id="signup-form">
+      <h1>Sign Up</h1>
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="signupName">Full Name</label>
+          <input type="text" id="signupName" required>
+        </div>
+        <div class="form-group">
+          <label for="signupEmail">Email</label>
+          <input type="email" id="signupEmail" required>
+        </div>
+        <div class="form-group">
+          <label for="signupPassword">Password</label>
+          <input type="password" id="signupPassword" required>
+          <small>Password must be at least 8 characters long</small>
+        </div>
+        <div class="form-group">
+          <label for="signupConfirmPassword">Confirm Password</label>
+          <input type="password" id="signupConfirmPassword" required>
+        </div>
+        <div class="error-message" id="signupError"></div>
+        <button type="submit">Sign Up</button>
+      </form>
+      <div class="form-links">
+        <a href="#" id="showLogin">Already have an account? Login</a>
+      </div>
+    </div>
+
+    <div class="form-container hidden" id="forgot-password-form">
+      <h1>Reset Password</h1>
+      <form id="forgotPasswordForm">
+        <div class="form-group">
+          <label for="resetEmail">Email</label>
+          <input type="email" id="resetEmail" required>
+        </div>
+        <div class="error-message" id="resetError"></div>
+        <button type="submit">Send Reset Link</button>
+      </form>
+      <div class="form-links">
+        <a href="#" id="backToLogin">Back to Login</a>
+      </div>
+    </div>
+
+    <div class="form-container hidden" id="reset-password-form">
+      <h1>Create New Password</h1>
+      <form id="resetPasswordForm">
+        <div class="form-group">
+          <label for="newPassword">New Password</label>
+          <input type="password" id="newPassword" required>
+          <small>Password must be at least 8 characters long</small>
+        </div>
+        <div class="form-group">
+          <label for="confirmNewPassword">Confirm New Password</label>
+          <input type="password" id="confirmNewPassword" required>
+        </div>
+        <div class="error-message" id="newPasswordError"></div>
+        <button type="submit">Update Password</button>
+      </form>
+    </div>
+
+    <div class="form-container hidden" id="dashboard">
+      <h1>Welcome <span id="userName"></span></h1>
+      <p>You are now logged in!</p>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
